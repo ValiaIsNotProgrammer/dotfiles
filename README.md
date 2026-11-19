@@ -1,0 +1,39 @@
+# macOS dotfiles
+
+Zsh configuration with Oh My Zsh, Powerlevel10k, Vim mode, suggestions and syntax highlighting. Supports Apple Silicon and Intel Homebrew locations.
+
+## Install on another Mac
+
+Install Xcode Command Line Tools (`xcode-select --install`) and Homebrew (https://brew.sh), then:
+
+```sh
+git clone git@github.com:ValiaIsNotProgrammer/dotfiles.git ~/projects/dotfiles
+cd ~/projects/dotfiles
+bash bootstrap.sh
+```
+
+The bootstrap installs the small Brewfile and missing shell plugins, then links the configuration. Existing plugins are not updated automatically. For an already configured Mac, use `bash install.sh` to only create links.
+
+Each replaced config is backed up under `~/.dotfiles-backups/<timestamp>-<pid>/`. Re-running installation leaves correct symlinks alone. To undo, remove the symlinks and copy the corresponding original files back from that backup. Keep this repository at its installed location, or rerun installation after moving it.
+
+## Local settings
+
+`~/.zshrc.local` (interactive shells) and `~/.zprofile.local` (login shells) are optional, private files outside this repository. Put credentials, proxy launchers and machine-specific environment variables there. Transfer them separately and securely if needed. Do not commit SSH/GPG keys, password stores, history or tokens.
+
+Node/NVM, Bun, Rust, TeX, Yandex Cloud, Docker and OpenVPN are optional and installed separately. Existing installations are picked up conditionally. `PYTHONBREAKPOINT=pudb.set_trace` requires `pudb` in the Python environment where it is used. Private proxy commands may also require `pass` and local helper scripts; these are not distributed here.
+
+The Powerlevel10k configuration is included. Use a Nerd Font in the terminal for its symbols, or run `p10k configure` to adjust the prompt. Terminal application settings and fonts are not included.
+
+## Deleting files
+
+The interactive `rm` alias moves files to `~/.trash`, preserving the previous workflow. This is not Finder Trash and is not an implementation of all `rm` flags: flags are ignored, and `--` permits names starting with a dash. Missing files produce an error. Use `command rm` for the real command when its exact semantics are needed.
+
+## Neovim
+
+Neovim's configuration remains in its separate repository:
+
+```sh
+git clone git@github.com:ValiaIsNotProgrammer/nvim_config.git ~/.config/nvim
+```
+
+Only do this when the destination does not already contain a configuration. Neovim plugins and language servers have their own installation requirements.
