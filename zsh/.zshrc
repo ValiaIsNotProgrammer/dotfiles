@@ -16,47 +16,11 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vim-mode)
 [[ -r "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 [[ -r "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
-# Preserve the existing private trash location (not macOS Finder Trash).
-move_to_trash() {
-  local arg base target
-  local -i result=0 suffix=0 options=1
-  command mkdir -p -- "$HOME/.trash" || return
-  for arg in "$@"; do
-    if (( options )); then
-      if [[ "$arg" == -- ]]; then options=0; continue; fi
-      [[ "$arg" == -* ]] && continue
-    fi
-    if [[ ! -e "$arg" && ! -L "$arg" ]]; then
-      print -u2 -- "trash: no such file: $arg"
-      result=1
-      continue
-    fi
-    if [[ "${arg:A}" == / || "${arg:A}" == "$HOME" || "${arg:A}" == "$HOME/.trash" || "${arg:t}" == . || "${arg:t}" == .. ]]; then
-      print -u2 -- "trash: refusing unsafe target: $arg"
-      result=1
-      continue
-    fi
-    base="${arg:t}"
-    target="$HOME/.trash/$base"
-    suffix=0
-    while [[ -e "$target" || -L "$target" ]]; do
-      (( ++suffix ))
-      target="$HOME/.trash/$base.$suffix"
-    done
-    command mv -- "$arg" "$target" || result=1
-  done
-  return $result
-}
-
-alias rm=move_to_trash
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 alias gtlg='git log -G"def\s+login"'
 alias docker-compose='docker compose'
-if [[ -x '/Applications/OpenVPN Connect/OpenVPN Connect.app/Contents/MacOS/OpenVPN Connect' ]]; then
-  alias openvpn='"/Applications/OpenVPN Connect/OpenVPN Connect.app/Contents/MacOS/OpenVPN Connect"'
-fi
 
 bindkey '^ ' up-line-or-beginning-search
 bindkey -M viins '^J' history-beginning-search-backward-end
@@ -81,3 +45,11 @@ path=("$BUN_INSTALL/bin" $path)
 [[ -r "$HOME/yandex-cloud/completion.zsh.inc" ]] && source "$HOME/yandex-cloud/completion.zsh.inc"
 
 [[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# Machine-local functions, resolved relative to this file's real location.
+() {
+  local function_file
+  for function_file in "${${(%):-%x}:A:h:h}"/functions/*.zsh(N); do
+    [[ -r "$function_file" ]] && source "$function_file"
+  done
+}

@@ -14,11 +14,13 @@ bash bootstrap.sh
 
 The bootstrap installs the small Brewfile and missing shell plugins, then links the configuration. Existing plugins are not updated automatically. For an already configured Mac, use `bash install.sh` to only create links.
 
+Existing configuration is backed up, not merged automatically. Before restarting the shell, copy any machine-specific functions you still need from the backup into `functions/*.zsh`, and environment settings into `~/.zshrc.local`. Avoid sourcing the entire old `.zshrc`, which could initialize plugins and PATH twice.
+
 Each replaced config is backed up under `~/.dotfiles-backups/<timestamp>-<pid>/`. Re-running installation leaves correct symlinks alone. To undo, remove the symlinks and copy the corresponding original files back from that backup. Keep this repository at its installed location, or rerun installation after moving it.
 
 ## Local settings
 
-`~/.zshrc.local` (interactive shells) and `~/.zprofile.local` (login shells) are optional, private files outside this repository. Put credentials, proxy launchers and machine-specific environment variables there. Transfer them separately and securely if needed. Do not commit SSH/GPG keys, password stores, history or tokens.
+`~/.zshrc.local` (interactive shells) and `~/.zprofile.local` (login shells) are optional, private files outside this repository. Put credentials and machine-specific environment variables there. Put local shell functions in `functions/*.zsh` inside this repository: for example, `functions/chatgpt.zsh`, `functions/codex.zsh` and `functions/proxy.zsh`. The entire `functions/` directory is ignored by Git; installation creates it and copies missing defaults from `templates/functions/`. Existing local function files are never overwritten. Files are sourced alphabetically after `.zshrc.local`. An absent or empty directory is valid. `move_to_trash` and its `rm` alias are seeded into `functions/move_to_trash.zsh`; the starter template is tracked, while the active copy is local. Changes to templates do not update an existing local copy. Transfer them separately and securely if needed. Do not commit SSH/GPG keys, password stores, history or tokens.
 
 Node/NVM, Bun, Rust, TeX, Yandex Cloud, Docker and OpenVPN are optional and installed separately. Existing installations are picked up conditionally. `PYTHONBREAKPOINT=pudb.set_trace` requires `pudb` in the Python environment where it is used. Private proxy commands may also require `pass` and local helper scripts; these are not distributed here.
 
