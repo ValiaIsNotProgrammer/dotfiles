@@ -1,4 +1,3 @@
-# Shell/editor essentials only; project runtimes are installed separately.
-brew "git"
+# Optional editor/search tools; enabled with bootstrap.sh --brew.
 brew "neovim"
 brew "ripgrep"

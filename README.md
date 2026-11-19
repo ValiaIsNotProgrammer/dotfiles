@@ -4,15 +4,25 @@ Zsh configuration with Oh My Zsh, Powerlevel10k, Vim mode, suggestions and synta
 
 ## Install on another Mac
 
-Install Xcode Command Line Tools (`xcode-select --install`) and Homebrew (https://brew.sh), then:
+Have Git available (for example via Xcode Command Line Tools: `xcode-select --install`), then:
 
 ```sh
 git clone git@github.com:ValiaIsNotProgrammer/dotfiles.git ~/projects/dotfiles
 cd ~/projects/dotfiles
+bash bootstrap.sh --dry-run
 bash bootstrap.sh
 ```
 
-The bootstrap installs the small Brewfile and missing shell plugins, then links the configuration. Existing plugins are not updated automatically. For an already configured Mac, use `bash install.sh` to only create links.
+By default, bootstrap only clones missing shell plugins and links the configuration. Git is a prerequisite and is never installed. Homebrew is not required unless you opt in with `--brew`:
+
+```sh
+bash bootstrap.sh --brew --dry-run  # preview including optional packages
+bash bootstrap.sh --brew            # install missing neovim/ripgrep via Homebrew
+bash install.sh --dry-run            # preview local configuration changes only
+bash install.sh                      # apply local configuration only
+```
+
+`--dry-run` (also accepted as `--dry-install`) reports existing dependencies, missing plugins/packages, conflicts, backups and links without writing files, cloning repositories or installing packages. It does not check network access or fetch available versions. Homebrew itself must be installed separately for `--brew`. Existing formulae and plugin repositories are not upgraded. The dry run can therefore be used before installing Homebrew, too.
 
 Existing configuration is backed up, not merged automatically. Before restarting the shell, copy any machine-specific functions you still need from the backup into `functions/*.zsh`, and environment settings into `~/.zshrc.local`. Avoid sourcing the entire old `.zshrc`, which could initialize plugins and PATH twice.
 
