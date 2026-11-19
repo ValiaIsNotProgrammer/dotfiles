@@ -24,21 +24,39 @@ for template_file in "$repo_dir"/templates/functions/*.zsh; do
   fi
 done
 backup_dir="$HOME/.dotfiles-backups/$(date +%Y%m%d-%H%M%S)-$$"
-for name in .zshenv .zprofile .zshrc .p10k.zsh; do
-  source_file="$repo_dir/zsh/$name"
-  target_file="$HOME/$name"
+link_config() {
+  local source_file="$1" target_file="$2" backup_name="$3"
   if [[ -L "$target_file" && "$(readlink "$target_file")" == "$source_file" ]]; then
     printf 'EXISTS: correct link %s\n' "$target_file"
-    continue
+    return
   fi
+  backup_config "$target_file" "$backup_name"
+  printf 'LINK: %s -> %s\n' "$target_file" "$source_file"
+  if ! $dry_run; then
+    mkdir -p "$(dirname "$target_file")"
+    ln -s "$source_file" "$target_file"
+  fi
+}
+backup_config() {
+  local target_file="$1" backup_name="$2"
   if [[ -e "$target_file" || -L "$target_file" ]]; then
-    printf 'BACKUP: %s -> %s/%s\n' "$target_file" "$backup_dir" "$name"
+    printf 'BACKUP: %s -> %s/%s\n' "$target_file" "$backup_dir" "$backup_name"
     if ! $dry_run; then
       mkdir -p "$backup_dir"
-      mv "$target_file" "$backup_dir/$name"
+      mv "$target_file" "$backup_dir/$backup_name"
     fi
   fi
-  printf 'LINK: %s -> %s\n' "$target_file" "$source_file"
-  if ! $dry_run; then ln -s "$source_file" "$target_file"; fi
+}
+for name in .zshenv .zprofile .zshrc .p10k.zsh; do
+  link_config "$repo_dir/zsh/$name" "$HOME/$name" "$name"
 done
+# Ghostty reads multiple paths; keep one canonical config to avoid overrides.
+ghostty_dir="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty"
+backup_config "$ghostty_dir/config.ghostty" ghostty-xdg-config.ghostty
+if [[ "$(uname -s)" == Darwin ]]; then
+  ghostty_mac="$HOME/Library/Application Support/com.mitchellh.ghostty"
+  backup_config "$ghostty_mac/config" ghostty-macos-config
+  backup_config "$ghostty_mac/config.ghostty" ghostty-macos-config.ghostty
+fi
+link_config "$repo_dir/ghostty/config" "$ghostty_dir/config" ghostty-xdg-config
 if ! $dry_run; then printf 'Done. Restart your terminal to apply the configuration.\n'; fi

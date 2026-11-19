@@ -3,11 +3,16 @@ set -euo pipefail
 repo_dir="$(cd "$(dirname "$0")" && pwd)"
 dry_run=false
 with_brew=false
+with_nvim=false
+source "$repo_dir/lib/homebrew.sh"
+brew_bin="$(dotfiles_find_brew)" || brew_bin=''
+if [[ -n "$brew_bin" ]]; then eval "$("$brew_bin" shellenv)"; fi
 for arg in "$@"; do
   case "$arg" in
     --dry-run|--dry-install) dry_run=true ;;
     --brew) with_brew=true ;;
-    -h|--help) printf 'Usage: bash bootstrap.sh [--brew] [--dry-run]\nHomebrew packages are opt-in. Git is never installed.\n'; exit 0 ;;
+    --nvim) with_nvim=true ;;
+    -h|--help) printf 'Usage: bash bootstrap.sh [--brew] [--nvim] [--dry-run]\nHomebrew packages are opt-in. Git is never installed.\n'; exit 0 ;;
     *) printf 'Unknown option: %s\n' "$arg" >&2; exit 2 ;;
   esac
 done
@@ -18,17 +23,17 @@ else
   printf 'MISSING: git; install Xcode Command Line Tools before cloning plugins.\n'
 fi
 if $with_brew; then
-  if ! command -v brew >/dev/null; then
+  if [[ -z "$brew_bin" ]]; then
     printf 'MISSING: Homebrew; install it separately from https://brew.sh\n'
     if ! $dry_run; then exit 1; fi
   fi
   while IFS= read -r formula; do
     [[ -n "$formula" ]] || continue
-    if command -v brew >/dev/null && HOMEBREW_NO_AUTO_UPDATE=1 brew list --versions "$formula" >/dev/null 2>&1; then
+    if [[ -n "$brew_bin" ]] && HOMEBREW_NO_AUTO_UPDATE=1 "$brew_bin" list --versions "$formula" >/dev/null 2>&1; then
       printf 'EXISTS: brew package %s (no upgrade)\n' "$formula"
     else
       printf 'INSTALL: brew package %s\n' "$formula"
-      if ! $dry_run; then HOMEBREW_NO_AUTO_UPDATE=1 brew install "$formula"; fi
+      if ! $dry_run; then HOMEBREW_NO_AUTO_UPDATE=1 "$brew_bin" install "$formula"; fi
     fi
   done < <(sed -n 's/^brew "\([^"]*\)".*$/\1/p' "$repo_dir/Brewfile")
 else
@@ -55,3 +60,23 @@ clone_missing https://github.com/zsh-users/zsh-autosuggestions.git "$custom_dir/
 clone_missing https://github.com/zsh-users/zsh-syntax-highlighting.git "$custom_dir/plugins/zsh-syntax-highlighting"
 clone_missing https://github.com/softmoth/zsh-vim-mode.git "$custom_dir/plugins/zsh-vim-mode"
 if $dry_run; then bash "$repo_dir/install.sh" --dry-run; else bash "$repo_dir/install.sh"; fi
+
+if $with_nvim; then
+  nvim_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
+  if [[ -e "$nvim_dir" || -L "$nvim_dir" ]]; then
+    printf 'KEEP: existing Neovim configuration %s (not replaced or pulled automatically).\n' "$nvim_dir"
+  else
+    clone_missing https://github.com/ValiaIsNotProgrammer/nvim_config.git "$nvim_dir"
+  fi
+  printf 'Neovim: start nvim to install missing plugins; use :Lazy restore for locked versions.\n'
+fi
+for tool in nvim rg fd; do
+  if command -v "$tool" >/dev/null; then
+    printf 'AVAILABLE: %s\n' "$tool"
+  elif [[ "$tool" == rg ]]; then
+    printf 'MISSING: rg; live grep will not work until ripgrep is installed (use --brew).\n'
+  else
+    printf 'MISSING: %s; use --brew to install.\n' "$tool"
+  fi
+done
+printf 'Run bash doctor.sh to verify the environment.\n'

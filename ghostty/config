@@ -1,0 +1,23 @@
+shell-integration = zsh
+
+keybind = shift+cmd+j=unbind
+
+keybind = cmd+k=scroll_page_lines:1
+keybind = cmd+j=scroll_page_lines:-1
+
+keybind = cmd+ctrl+plus=equalize_splits
+
+keybind = cmd+s=new_split:right
+keybind = cmd+shift+s=new_split:down
+
+keybind = cmd+shift+h=resize_split:left,10
+keybind = cmd+shift+k=resize_split:up,10
+keybind = cmd+shift+j=resize_split:down,10
+keybind = cmd+shift+l=resize_split:right,10
+
+keybind = shift+cmd+enter=toggle_split_zoom
+keybind = cmd+W=close_surface
+
+keybind = shift+space=text:\x1b@
+keybind = cmd+enter=text:\r
+
