@@ -21,3 +21,6 @@ keybind = cmd+W=close_surface
 keybind = shift+space=text:\x1b@
 keybind = cmd+enter=text:\r
 
+# Open output in Neovim through functions/ghostty-scrollback.zsh.
+keybind = cmd+shift+o=write_scrollback_file:paste
+keybind = cmd+alt+shift+o=write_screen_file:paste

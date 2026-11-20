@@ -69,3 +69,15 @@ exec zsh -l
 ```
 
 After updating Neovim configuration, restart Neovim. LuaRocks and unused Node/Python/Ruby remote-plugin providers are disabled in `nvim_config`; this does not disable LSP or Python project environments. If you add plugins requiring those hosts, enable and install the appropriate host. `doctor.sh` does not start Neovim, modify files, fetch repositories or install tools. It checks executable availability, Neovim's minimum version, config links, shell plugin entrypoints and presence of key Neovim plugin directories. Language-server and parser checks remain in `:checkhealth` after opening the corresponding source file.
+
+## Keyboard selection of terminal output
+
+Installation seeds `functions/ghostty-scrollback.zsh` alongside `move_to_trash.zsh`. It uses the same copy-if-missing policy; your local function files remain ignored by Git and are never overwritten. On an existing Mac, run `bash install.sh` after pulling to install the new helper.
+
+At an idle Zsh prompt in Ghostty:
+
+- **Cmd+Shift+O** opens scrollback history in read-only Neovim.
+- **Cmd+Alt+Shift+O** opens the visible screen. Ghostty 1.2.3 exports history and screen separately; use this when output has not scrolled off screen yet.
+- In Neovim use `/` to search, `v`/`V` to select, `y` to copy with the shared Neovim clipboard configuration, and `:q!` to return.
+
+Reload Zsh (`exec zsh`) and Ghostty settings (Cmd+Shift+comma) after installation. This is a Zsh integration, not a global viewer for running applications or remote shells. It recognizes owned Ghostty temporary `history.txt`/`screen.txt` paths inserted at the prompt and preserves the surrounding command line. The text export does not preserve terminal colors. Tested with Ghostty 1.2.3; newer versions must retain the same temporary-file naming convention. If a path is inserted without opening the viewer, clear it without executing it and check the helper is loaded.
